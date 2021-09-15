@@ -22,70 +22,37 @@ struct Administrator {
     }
 };
 
+struct Course {
+    int id;
+    string name;
+    int credits;
+    Course* sig;
+    struct Group* enlaceGrupoC; //Relation of course-group.
+
+    Course(int idd, string n, int cr) {
+        id = idd;
+        name = n;
+        credits = cr;
+        sig = NULL;
+        enlaceGrupoC = NULL;
+    }
+};
 
 struct Teacher {
     int id;
     string name;
     Teacher* sig;
     Teacher* ant;
-    struct GroupAssignment* bondGroupT; //Relation of teacher-group.
+    struct GroupAssignment* subListGroupT; //Relation of teacher-group.
 
     Teacher(int idp, string namep) {
         id = idp;
         name = namep;
         sig = NULL;
         ant = NULL;
-        bondGroupT = NULL;
+        subListGroupT = NULL;
     }
 };
-
-
-struct GroupAssignment {
-
-    GroupAssignment* sig;
-    struct Course* sublistaGroupAssignment;
-
-    GroupAssignment()
-    {
-        sig = NULL;
-        sublistaGroupAssignment = NULL;
-    }
-};
-
-
-struct Semester {
-    int semester;
-    int year;
-    int week;
-    Semester* sig;
-    Semester* ant;
-    struct CourseAssignment* enlaceCurso; // Relation of semester-course.
-    struct generalTalks* enlaceCharla; // Relation of semester-general talks.
-
-    Semester(int s, int y, int w) {
-        semester = s;
-        year = y;
-        week = w;
-        sig = NULL;
-        ant = NULL;
-        enlaceCurso = NULL;
-        enlaceCharla = NULL;
-    }
-};
-
-
-struct CourseAssignment {
-
-    CourseAssignment* sig;
-    struct Course* subListCourseAssignment;
-
-    CourseAssignment()
-    {
-        CourseAssignment* sig = NULL;
-        subListCourseAssignment = NULL;
-    }
-};
-
 
 struct Student {
     int id;
@@ -101,45 +68,23 @@ struct Student {
     }
 };
 
+struct Semester {
+    int semester;
+    int year;
+    int week;
+    Semester* sig;
+    Semester* ant;
+    struct CourseAssignment* subListCourse; // Relation of semester-course.
+    struct generalTalks* bondTalk; // Relation of semester-general talks.
 
-struct speakingAssistance {
-
-    speakingAssistance* sig;
-    struct generalTalks* enlaceCharlas;
-    speakingAssistance()
-    {
+    Semester(int s, int y, int w) {
+        semester = s;
+        year = y;
+        week = w;
         sig = NULL;
-        enlaceCharlas = NULL;
-    }
-};
-
-
-struct assignmentsDelivered {
-
-    assignmentsDelivered* sig;
-    struct Evaluation* enlaceAsignaciones;
-
-    assignmentsDelivered()
-    {
-        sig = NULL;
-        enlaceAsignaciones = NULL;
-    }
-};
-
-
-struct Course {
-    int id;
-    string name;
-    int credits;
-    Course* sig;
-    struct Group* enlaceGrupoC; //Relation of course-group.
-
-    Course(int idd, string n, int cr) {
-        id = idd;
-        name = n;
-        credits = cr;
-        sig = NULL;
-        enlaceGrupoC = NULL;
+        ant = NULL;
+        subListCourse = NULL;
+        bondTalk = NULL;
     }
 };
 
@@ -196,6 +141,44 @@ struct Group {
         sublistaProyectos = NULL;
         sublistaGiras = NULL;
         sublistaExamen = NULL;
+    }
+};
+
+
+//SubLists.
+struct assignmentsDelivered {
+
+    assignmentsDelivered* sig;
+    struct Evaluation* bondAssignments;
+
+    assignmentsDelivered()
+    {
+        sig = NULL;
+        bondAssignments = NULL;
+    }
+};
+
+
+struct CourseAssignment {
+
+    CourseAssignment* sig;
+    struct Course* bondCourse;
+
+    CourseAssignment()
+    {
+        sig = NULL;
+        bondCourse = NULL;
+    }
+};
+
+struct GroupAssignment{
+
+    GroupAssignment* sig;
+    struct Group * bondGroup;
+
+    GroupAssignment(){
+        sig = NULL;
+        bondGroup = NULL;
     }
 };
 
@@ -602,6 +585,8 @@ void insertGroupC(int id, int numG) //It is used for insert groups as a sublist 
 
     tempCourse->enlaceGrupoC = nnG;
 }
+
+
 //----------------------------------------------------------------------------------------------------------------------
 int main()
 {
