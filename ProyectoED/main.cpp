@@ -132,7 +132,7 @@ struct Group {
     struct Evaluation* sublistaGiras; //Relation of group-tours.
     struct Evaluation* sublistaExamen; //Relation of group-exam.
 
-    Group(int num, int s) {
+    Group(int num) {
         number = num;
 
         sig = NULL;
@@ -360,6 +360,7 @@ bool remStudent(int id, string name) { //To delete student
             return false;
         }
     }
+    return false;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -375,8 +376,6 @@ Semester* searchSemester(int year, int numSemester)  //search for the list of th
         temp = temp->sig;
 
     }
-
-
     return NULL;
 }
 
@@ -530,7 +529,6 @@ void insertCourse(int id, string name, int credits)   //insertion to the final p
             temp->sig = nn; //it inserts the element in the last position of the list
             cout << "insertCourse completed" << endl;
         }
-
     }
 }
 
@@ -551,6 +549,7 @@ void delCourse(int id)  //it is used to delete elements of the list of courses
 {
     Course* temp = searchCourse(id);
     Course* prev = firstCourse;
+    //it verifies if the element to delete exist
     if (temp == NULL) { cout << "The element to delete in delCourse was not found" << endl; }
     else if (firstCourse->id == temp->id) //if the element is the first in the list
     {
@@ -574,35 +573,75 @@ void delCourse(int id)  //it is used to delete elements of the list of courses
         cout << "The element was deleted in delCourse" << endl;
     }
 }
-void insertGroupC(int id, int numG) //It is used for insert groups as a sublist in courses
+
+void insertGroupC(int idC, int numG) //It is used for insert groups as a sublist in courses
 {
-    Course* tempCourse = searchCourse(id);
-    if (tempCourse == NULL)
+    Course* tempCourse = searchCourse(idC);
+    if (tempCourse == NULL)     //to verify if the course exists
     {
         cout << "Data not found" << endl;
     }
-    Group * nnG = new Group(numG);
+    Group* nnG = new Group(numG);
 
-    tempCourse->enlaceGrupoC = nnG;
+    if (tempCourse->enlaceGrupoC == NULL)      //if the list is empty
+    {
+        tempCourse->enlaceGrupoC = nnG;
+        nnG->enlaceCourse = tempCourse;     //it links the group with the course
+        cout << "element inserted in the empty list...already is not empty. Function insertGroupC" << endl;
+    }
+
+    else if (nnG->number < tempCourse->enlaceGrupoC->number)   //if the element is minor than the first
+    {   //it is going to position in the first place in the list
+        nnG->sig = tempCourse->enlaceGrupoC;
+        tempCourse->enlaceGrupoC = nnG; //it inserts in the first position of the list
+        nnG->enlaceCourse = tempCourse; //it links the list with the course
+        cout << "element inserted in the first position. Function insertGroupC" << endl;
+    }
+    else    //if the element is in between or in the final position
+    {
+        //we need to create the temps with the instance group to make the changes
+        Group* temp = tempCourse->enlaceGrupoC;
+        Group* tempPrev = tempCourse->enlaceGrupoC;
+        while (temp != NULL && nnG->number > temp->number)
+        {
+            tempPrev = temp;
+            temp = temp->sig;
+        }
+        if (temp == NULL) //if the element is the greatest
+        {
+            tempPrev->sig = nnG;
+            nnG->enlaceCourse = tempCourse;
+            cout << "element inserted in the last position. Function insertGroupC";
+        }
+        else    //if the element is between the list
+        {
+            nnG->sig = temp;
+            tempPrev->sig = nnG;
+            nnG->enlaceCourse = tempCourse;
+            cout << "element inserted in the middle position. Function insertGroupC";
+        }
+    }
+
+
+
+
 }
+
 //----------------------------------------------------------------------------------------------------------------------
 int main()
 {
+    insertCourse(1, "A", 3);
+    insertGroupC(1, 51);
+    insertGroupC(1, 52);
+    insertGroupC(1, 50);
+    insertGroupC(1, 49);
 
-    semesterInsert(2, 2021, 16);
-    semesterInsert(1, 2021, 16);
-    semesterInsert(2, 2019, 16);
-    semesterInsert(1, 2019, 16);
-    semesterInsert(2, 2020, 16);
-    semesterInsert(1, 2020, 16);
-    semesterInsert(1, 2017, 16);
-    semesterInsert(2, 2150, 16);
-    semesterInsert(1, 2150, 16);
-    semesterInsert(1, 2016, 16);
-    semesterInsert(2, 2012, 16);
-
-    semesterMod(2017, 1, 2, 2018, 16);
-
-    semesterDelete(2021, 1);
-
+        Course * temp = firstCourse;
+        Group * tempaux = firstCourse->enlaceGrupoC;
+        while(tempaux!=NULL)
+        {
+            cout<<tempaux->number<<endl<<"Del curso: "<<tempaux->enlaceCourse->id<<endl;
+            tempaux = tempaux->sig;
+        }
 }
+
