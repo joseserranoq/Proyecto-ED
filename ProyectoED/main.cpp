@@ -574,7 +574,8 @@ void delCourse(int id)  //it is used to delete elements of the list of courses
     }
 }
 
-void insertGroupC(int idC, int numG) //It is used for insert groups as a sublist in courses
+
+void insertToGroupC(int idC, int numG) //It is used for insert groups as a sublist in courses
 {
     Course* tempCourse = searchCourse(idC);
     if (tempCourse == NULL)     //to verify if the course exists
@@ -611,14 +612,14 @@ void insertGroupC(int idC, int numG) //It is used for insert groups as a sublist
         {
             tempPrev->sig = nnG;
             nnG->enlaceCourse = tempCourse;
-            cout << "element inserted in the last position. Function insertGroupC";
+            cout << "element inserted in the last position. Function insertGroupC"<<endl;
         }
         else    //if the element is between the list
         {
             nnG->sig = temp;
             tempPrev->sig = nnG;
             nnG->enlaceCourse = tempCourse;
-            cout << "element inserted in the middle position. Function insertGroupC";
+            cout << "element inserted in the middle position. Function insertGroupC"<<endl;
         }
     }
 
@@ -627,21 +628,73 @@ void insertGroupC(int idC, int numG) //It is used for insert groups as a sublist
 
 }
 
+Group* searchGroupInCourse(int idC, int idG)
+{
+    Course* tempC = searchCourse(idC);
+    Group* tempG = tempC->enlaceGrupoC;
+
+    while (tempG != NULL)
+    {
+        if (tempG->number == idG) { return tempG; }
+        tempG = tempG->sig;
+    }
+    return NULL;
+}
+void linkTeacherToGroup(int idProf, int idCourse, int idGroup)    //it is used to link teacher with its groups
+{
+    Teacher* tempT = searchTeacher(idProf);
+    Course* tempC = searchCourse(idCourse);
+    Group* tempG = searchGroupInCourse(idCourse, idGroup);  //it makes a search of the element in group
+    if (tempT == NULL || tempC == NULL || tempG == NULL) { cout << "There is an element that does not exist"<<endl; }
+    else
+    {
+        //linking the lists
+        GroupAssignment* nnL = new GroupAssignment();
+
+        nnL->bondGroup = tempG; //it adds the link of the group
+
+        //beginning insert
+        nnL->sig = tempT->subListGroupT;
+        tempT->subListGroupT = nnL;
+
+    }
+}
+
+
 //----------------------------------------------------------------------------------------------------------------------
 int main()
 {
-    insertCourse(1, "A", 3);
-    insertGroupC(1, 51);
-    insertGroupC(1, 52);
-    insertGroupC(1, 50);
-    insertGroupC(1, 49);
 
-        Course * temp = firstCourse;
-        Group * tempaux = firstCourse->enlaceGrupoC;
-        while(tempaux!=NULL)
-        {
-            cout<<tempaux->number<<endl<<"Del curso: "<<tempaux->enlaceCourse->id<<endl;
-            tempaux = tempaux->sig;
-        }
+    teacherInsert(123, "HHH");
+    //teacherInsert(1234, "AAA");
+
+    insertCourse(1, "A", 3);
+    insertCourse(2, "B", 4);
+
+    insertToGroupC(1, 51);
+    insertToGroupC(1, 52);
+    insertToGroupC(1, 50);
+    insertToGroupC(1, 49);
+
+    insertToGroupC(2, 60);
+    insertToGroupC(2, 61);
+    insertToGroupC(2, 62);
+
+    linkTeacherToGroup(123, 1, 51);
+    linkTeacherToGroup(123, 2, 60);
+    linkTeacherToGroup(123, 2, 59); //it does not exist
+
+     /*Course* temp = firstCourse;
+     Group * tempaux = firstCourse->sig->enlaceGrupoC;
+     while(tempaux!=NULL)
+     {
+         cout<<tempaux->number<<endl<<"Del curso: "<<tempaux->enlaceCourse->id<<endl;
+         tempaux = tempaux->sig;
+     }*/
+
+    Teacher* temp = firstTeacher;
+    cout << temp->subListGroupT->bondGroup->number << endl << temp->subListGroupT->sig->bondGroup->number;
+
 }
+
 
