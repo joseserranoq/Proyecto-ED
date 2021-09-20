@@ -171,12 +171,12 @@ struct CourseAssignment {
     }
 };
 
-struct GroupAssignment{
+struct GroupAssignment {
 
     GroupAssignment* sig;
-    struct Group * bondGroup;
+    struct Group* bondGroup;
 
-    GroupAssignment(){
+    GroupAssignment() {
         sig = NULL;
         bondGroup = NULL;
     }
@@ -281,11 +281,10 @@ Administrator* administratorInsert(int id, string name) {
 
 //----------------------------------------------------------------------------------------------------------------------
 
-Student* searchStudent(int id, string name) {  //
+Student* searchStudent(int id) {  //
     Student* local = firstStudent;
     while (local != NULL) {
-        if ((local->id == id) && (local->name == name))
-            return local;
+        if (local->id == id) { return local; }
         local = local->sig;
     }
     return NULL;
@@ -294,8 +293,8 @@ Student* searchStudent(int id, string name) {  //
 Student* inserStudent(int id, string name) {   //To insert student
     Student* nn = new Student(id, name);
 
-    if (searchStudent(id, name) != NULL) {     //To verify that not repeated data
-        cout << "The student is already registered: " << id << ", " << name << endl;
+    if (searchStudent(id) != NULL) {     //To verify that not repeated data
+        cout << "The student is already registered: " << id <<endl;
     }
 
     else {
@@ -320,8 +319,8 @@ Student* inserStudent(int id, string name) {   //To insert student
     return firstStudent;
 }
 
-bool modifyStudent(int id, string name, int idN, string nameN) {      //To modify student data
-    Student* temp = searchStudent(id, name);
+bool modifyStudent(int id, int idN, string nameN) {      //To modify student data
+    Student* temp = searchStudent(id);
     if (temp == NULL) {
         cout << "\nUnregistered student";
         return false;
@@ -575,7 +574,7 @@ void delCourse(int id)  //it is used to delete elements of the list of courses
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void insertToGroupC(int idC, int numG) //It is used for insert groups as a sublist in courses
+void insertGroupToCourse(int idC, int numG) //It is used for insert groups as a sublist in courses
 {
     Course* tempCourse = searchCourse(idC);
     if (tempCourse == NULL)     //to verify if the course exists
@@ -612,14 +611,14 @@ void insertToGroupC(int idC, int numG) //It is used for insert groups as a subli
         {
             tempPrev->sig = nnG;
             nnG->enlaceCourse = tempCourse;
-            cout << "element inserted in the last position. Function insertGroupC"<<endl;
+            cout << "element inserted in the last position. Function insertGroupC" << endl;
         }
         else    //if the element is between the list
         {
             nnG->sig = temp;
             tempPrev->sig = nnG;
             nnG->enlaceCourse = tempCourse;
-            cout << "element inserted in the middle position. Function insertGroupC"<<endl;
+            cout << "element inserted in the middle position. Function insertGroupC" << endl;
         }
     }
 
@@ -628,7 +627,7 @@ void insertToGroupC(int idC, int numG) //It is used for insert groups as a subli
 
 }
 //----------------------------------------------------------------------------------------------------------------------
-Group* searchGroupInCourse(int idC, int idG)
+Group* searchGroupInCourse(int idC, int idG)   //it is used to find the group in linked to course
 {
     Course* tempC = searchCourse(idC);
     Group* tempG = tempC->enlaceGrupoC;
@@ -647,7 +646,7 @@ void linkTeacherToGroup(int idProf, int idCourse, int idGroup)    //it is used t
     Teacher* tempT = searchTeacher(idProf);
     Course* tempC = searchCourse(idCourse);
     Group* tempG = searchGroupInCourse(idCourse, idGroup);  //it makes a search of the element in group
-    if (tempT == NULL || tempC == NULL || tempG == NULL) { cout << "There is an element that does not exist"<<endl; }
+    if (tempT == NULL || tempC == NULL || tempG == NULL) { cout << "There is an element that does not exist" << endl; }
     else
     {
         //linking the lists
@@ -663,39 +662,39 @@ void linkTeacherToGroup(int idProf, int idCourse, int idGroup)    //it is used t
 }
 //----------------------------------------------------------------------------------------------------------------------
 //To bond the struct student with group
-void bondStudentGroup(int idS,string nameS,int idG,int idC){
-    Student*ss=searchStudent(idS,nameS);
-    Group*gg=searchGroupInCourse(idG,idC);
-    Course*cc=searchCourse(idC);
+void bondStudentGroup(int idS, int idG, int idC) {
+    Student* ss = searchStudent(idS);
+    Group* gg = searchGroupInCourse(idC, idG);
+    Course* cc = searchCourse(idC);
 
-    if(ss==NULL||ss==NULL||cc==NULL) {//For elements not exist
-        cout<< "Elements does not exit";
+    if (ss == NULL || gg == NULL || cc == NULL) {//For elements not exist
+        cout << "Elements does not exit";
     }
-    else{//To elements exist
-        GroupAssignment*SG= new GroupAssignment();
-        SG->bondGroup=gg;  //Unit the group
+    else {//To elements exist
+        GroupAssignment* SG = new GroupAssignment();
+        SG->bondGroup = gg;  //Unit the group
 
         //To insert
-        SG->sig=ss->sublistGroup;
-        ss->sublistGroup=SG;
-}
+        SG->sig = ss->sublistGroup;
+        ss->sublistGroup = SG;
+    }
 }
 //----------------------------------------------------------------------------------------------------------------------
 //To bond semester with course
-void bondSemesterCourse(int yearS,int numS,int idC){
-    Semester*se=searchSemester(yearS,numS);
-    Course*cou=searchCourse(idC);
-    if(se==NULL||cou==NULL){//To elements not exist
-        cout<<"The element does not exist";
+void bondSemesterCourse(int yearS, int numS, int idC) {
+    Semester* se = searchSemester(yearS, numS);
+    Course* cou = searchCourse(idC);
+    if (se == NULL || cou == NULL) {//To elements not exist
+        cout << "The element does not exist";
     }
-    else{//To elements exist
-        CourseAssignment*SC=new CourseAssignment();
-        SC->bondCourse=cou;
+    else {//To elements exist
+        CourseAssignment* SC = new CourseAssignment();
+        SC->bondCourse = cou;
 
         //To insert
-        SC->sig=se->subListCourse;
-        se->subListCourse=SC;
-}
+        SC->sig = se->subListCourse;
+        se->subListCourse = SC;
+    }
 }
 
 
@@ -713,36 +712,50 @@ int main()
     insertCourse(1, "A", 3);
     insertCourse(2, "B", 4);
 
-    insertToGroupC(1, 51);
-    insertToGroupC(1, 52);
-    insertToGroupC(1, 50);
-    insertToGroupC(1, 49);
+    insertGroupToCourse(1, 51);
+    insertGroupToCourse(1, 52);
+    insertGroupToCourse(1, 50);
+    insertGroupToCourse(1, 49);
 
-    insertToGroupC(2, 60);
-    insertToGroupC(2, 61);
-    insertToGroupC(2, 62);
+    insertGroupToCourse(2, 60);
+    insertGroupToCourse(2, 61);
+    insertGroupToCourse(2, 62);
 
     linkTeacherToGroup(123, 1, 51);
     linkTeacherToGroup(123, 2, 60);
     linkTeacherToGroup(123, 2, 59); //it does not exist
 
-    inserStudent(7,"Sammi");
-    bondStudentGroup(7,"Sammi",1,1);
+    inserStudent(7, "Sammi");
+    bondStudentGroup(7, 51, 1);
+    bondStudentGroup(7, 49, 1);
 
-    Student*temp1=firstStudent;
-    cout<<temp1->sublistGroup->bondGroup->number<<endl<<temp1->sublistGroup->sig->bondGroup->number;
+    semesterInsert(1, 2020, 6);
+    semesterInsert(2, 2022, 6);
+    semesterInsert(1, 2019, 2);
 
-     /*Course* temp = firstCourse;
-     Group * tempaux = firstCourse->sig->enlaceGrupoC;
-     while(tempaux!=NULL)
-     {
-         cout<<tempaux->number<<endl<<"Del curso: "<<tempaux->enlaceCourse->id<<endl;
-         tempaux = tempaux->sig;
-     }*/
-/*/
-    Teacher* temp = firstTeacher;
-    cout << temp->subListGroupT->bondGroup->number << endl << temp->subListGroupT->sig->bondGroup->number;
-/*/
+
+    Student* temp1 = firstStudent;
+    cout << temp1->sublistGroup->bondGroup->number << endl << temp1->sublistGroup->sig->bondGroup->number<<endl;
+
+    bondSemesterCourse(2019, 1, 1);
+    bondSemesterCourse(2019, 1, 2);
+    Semester* temp2 = firstSemester;
+
+    /*76cout << temp2->subListCourse->bondCourse->name << endl;
+    cout << temp2->subListCourse->sig->bondCourse->name << endl;
+
+    Course* temp = firstCourse;
+    Group * tempaux = firstCourse->sig->enlaceGrupoC;
+    while(tempaux!=NULL)
+    {
+        cout<<tempaux->number<<endl<<"Del curso: "<<tempaux->enlaceCourse->id<<endl;
+        tempaux = tempaux->sig;
+    }*/
+    /*/
+        Teacher* temp = firstTeacher;
+        cout << temp->subListGroupT->bondGroup->number << endl << temp->subListGroupT->sig->bondGroup->number;
+    /*/
 }
+
 
 
