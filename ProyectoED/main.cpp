@@ -1,4 +1,4 @@
-}// Nombre de estudiantes: Samantha Acuña Montero, Katherine Amador González, Jose Serrano Quesada.
+// Nombre de estudiantes: Samantha Acuña Montero, Katherine Amador González, Jose Serrano Quesada.
 // Fecha de inicio: 31/08/2021
 // Fecha de finalizacion:
 
@@ -704,6 +704,32 @@ void bondStudentGroup(int idS, int idG, int idC) {
         //To insert
         SG->sig = ss->sublistGroup;
         ss->sublistGroup = SG;
+    }
+}
+
+void deleteStudentGroup(int idStu, int idGro, int idCour){//To delete the bond of student with group
+    Student* student = searchStudent(idStu);
+    Group* group = searchGroupInCourse(idCour, idGro);
+    if (student==NULL||group==NULL||student->sublistGroup==NULL){//To verify if both student or group exist
+        cout<<"Some elements of student or group do not exist"<<endl;
+    }
+    else{
+        GroupAssignment*studentemp=student->sublistGroup;
+        GroupAssignment*tempS=student->sublistGroup;
+
+        if(studentemp->bondGroup->number==idGro){//To first elements of the list
+            studentemp=studentemp->sig;
+            student->sublistGroup=studentemp;
+            cout<<"The student has been removed from the group"<<endl;
+        }
+        else{//For the others elements of the list, that not first
+            while(studentemp->bondGroup!=group){
+                tempS=studentemp;
+                studentemp=studentemp->sig;
+            }
+            tempS->sig=studentemp->sig;
+            cout<<"The student has been removed from the group"<<endl;
+        }
     }
 }
 //----------------------------------------------------------------------------------------------------------------------
