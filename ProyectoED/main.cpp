@@ -1,4 +1,4 @@
-// Nombre de estudiantes: Samantha Acuña Montero, Katherine Amador González, Jose Serrano Quesada.
+}// Nombre de estudiantes: Samantha Acuña Montero, Katherine Amador González, Jose Serrano Quesada.
 // Fecha de inicio: 31/08/2021
 // Fecha de finalizacion:
 
@@ -660,6 +660,33 @@ void linkTeacherToGroup(int idProf, int idCourse, int idGroup)    //it is used t
 
     }
 }
+void deleteTeacherToGroup(int idTeacher,int idCourse,int idGroup)
+{
+    Teacher* tempTeacher = searchTeacher(idTeacher);
+    Group* tempGroup = searchGroupInCourse(idCourse, idGroup);
+
+    if (tempTeacher == NULL || tempGroup == NULL || tempTeacher->subListGroupT == NULL) { cout << "There is an element that does not exist in function deleteTeacherToGroup"<<endl; }
+    else
+    {
+        GroupAssignment* temp = tempTeacher->subListGroupT;
+        GroupAssignment* tempPrev = tempTeacher->subListGroupT;
+        if (temp->bondGroup->number == idGroup) // if it is the first element in the list
+        {
+            temp = temp->sig;
+            tempTeacher->subListGroupT = temp;
+        }
+        else
+        {
+            while (temp->bondGroup != tempGroup)
+            {
+                tempPrev = temp;
+                temp = temp->sig;
+            }
+            tempPrev->sig = temp->sig;
+            cout << "the element has been deleted in function deleteTeacherToGroup" << endl;
+        }
+    }
+}
 //----------------------------------------------------------------------------------------------------------------------
 //To bond the struct student with group
 void bondStudentGroup(int idS, int idG, int idC) {
@@ -697,11 +724,6 @@ void bondSemesterCourse(int yearS, int numS, int idC) {
     }
 }
 
-
-
-
-
-
 //----------------------------------------------------------------------------------------------------------------------
 int main()
 {
@@ -723,25 +745,37 @@ int main()
 
     linkTeacherToGroup(123, 1, 51);
     linkTeacherToGroup(123, 2, 60);
+    linkTeacherToGroup(123, 2, 61);
+    linkTeacherToGroup(123, 1, 52);
     linkTeacherToGroup(123, 2, 59); //it does not exist
 
-    inserStudent(7, "Sammi");
-    bondStudentGroup(7, 51, 1);
-    bondStudentGroup(7, 49, 1);
+    deleteTeacherToGroup(123, 2, 60);
 
-    semesterInsert(1, 2020, 6);
-    semesterInsert(2, 2022, 6);
-    semesterInsert(1, 2019, 2);
+    //inserStudent(7, "Sammi");
+    //bondStudentGroup(7, 51, 1);
+    //bondStudentGroup(7, 49, 1);
+
+    //semesterInsert(1, 2020, 6);
+    //semesterInsert(2, 2022, 6);
+    //semesterInsert(1, 2019, 2);
+
+    //bondSemesterCourse(2019, 1, 1);
+    //bondSemesterCourse(2019, 1, 2);
+
+    Teacher* temp = firstTeacher;
+    GroupAssignment* tempaux = temp->subListGroupT;
+    while (tempaux != NULL)
+    {
+        cout << tempaux->bondGroup->number<<endl;
+        tempaux = tempaux->sig;
+    }
 
 
-    Student* temp1 = firstStudent;
-    cout << temp1->sublistGroup->bondGroup->number << endl << temp1->sublistGroup->sig->bondGroup->number<<endl;
 
-    bondSemesterCourse(2019, 1, 1);
-    bondSemesterCourse(2019, 1, 2);
-    Semester* temp2 = firstSemester;
+   /*  Student* temp1 = firstStudent;
+    cout << temp1->sublistGroup->bondGroup->number << endl << temp1->sublistGroup->sig->bondGroup->number<<endl;Semester* temp2 = firstSemester;
 
-    /*76cout << temp2->subListCourse->bondCourse->name << endl;
+    cout << temp2->subListCourse->bondCourse->name << endl;
     cout << temp2->subListCourse->sig->bondCourse->name << endl;
 
     Course* temp = firstCourse;
@@ -750,12 +784,10 @@ int main()
     {
         cout<<tempaux->number<<endl<<"Del curso: "<<tempaux->enlaceCourse->id<<endl;
         tempaux = tempaux->sig;
-    }*/
-    /*/
-        Teacher* temp = firstTeacher;
-        cout << temp->subListGroupT->bondGroup->number << endl << temp->subListGroupT->sig->bondGroup->number;
-    /*/
-}
+    }
+    */
 
+
+}
 
 
