@@ -279,6 +279,15 @@ Administrator* administratorInsert(int id, string name) {
     return firstAdmin;
 }
 
+Administrator* searchAdministrator(int idAdm) { // To search in the list an administrator.
+    Administrator* tempAdm = firstAdmin;
+    while (tempAdm != NULL) {
+        if (tempAdm->id == idAdm) {
+            return tempAdm;
+            tempAdm = tempAdm->sig;
+        }
+    }return NULL;
+}
 //----------------------------------------------------------------------------------------------------------------------
 
 Student* searchStudent(int id) {  //
@@ -531,13 +540,14 @@ void insertCourse(int id, string name, int credits)   //insertion to the final p
     }
 }
 
-void modCourse(int idm, string namem, int id)   //It is used to modify the list of courses
+void modCourse(int id, int idm, string namem,int credistm)   //It is used to modify the list of courses
 {
     Course* temp = searchCourse(id);
     if (temp != NULL)
     {
         temp->id = idm;
         temp->name = namem;
+        temp->credits=credistm;
         cout << "modCourse completed" << endl;
     }
     else { cout << "element of modCourse not found to modify" << endl; }
@@ -754,66 +764,269 @@ void bondSemesterCourse(int yearS, int numS, int idC) {
 int main()
 {
 
-    teacherInsert(123, "HHH");
-    //teacherInsert(1234, "AAA");
+    int option;
+    bool repeat = true;
 
-    insertCourse(1, "A", 3);
-    insertCourse(2, "B", 4);
+    do {
+        system("cls");
 
-    insertGroupToCourse(1, 51);
-    insertGroupToCourse(1, 52);
-    insertGroupToCourse(1, 50);
-    insertGroupToCourse(1, 49);
+        // Texto del menú que se verá cada vez.
+        cout << "\n\t\tOption Menu\n" << endl;
+        cout << "1- Administrator." << endl;
+        cout << "2- Teacher." << endl;
+        cout << "3- Students." << endl;
+        cout << "4- Exit" << endl;
 
-    insertGroupToCourse(2, 60);
-    insertGroupToCourse(2, 61);
-    insertGroupToCourse(2, 62);
+        cout << "\nEnter one option: ";
+        cin >> option;
+        if (option == 1)
+        {
+            int option1;
+            cout << "1. Register Administrator." << endl;
+            cout << "2. Login Administrator." << endl;
+            cout << "\nEnter one option: ";
+            cin >> option1;
+            if (option1 == 1)
+            {
+                int idAdmi;
+                string nameAdmin;
+                cout << "Insert administrator." << endl;
 
-    linkTeacherToGroup(123, 1, 51);
-    linkTeacherToGroup(123, 2, 60);
-    linkTeacherToGroup(123, 2, 61);
-    linkTeacherToGroup(123, 1, 52);
-    linkTeacherToGroup(123, 2, 59); //it does not exist
+                cout << "Enter the ID: " << endl;
+                cin >> idAdmi;
+                cout << "Enter the name: " << endl;
+                cin >> nameAdmin;
+                administratorInsert(idAdmi, nameAdmin);
+            }
+            if (option1 == 2)
+            {
+                int option11;
+                int idAdm;
+                cout << "Enter the administrator ID: " << endl;
+                cin >> idAdm;
+                if (searchAdministrator(idAdm) != NULL)
+                {
+                    cout << "1- Teacher options." << endl;
+                    cout << "2- Student options." << endl;
+                    cout << "3- Course options." << endl;
+                    cout << "4- Group options." << endl;
+                    cout << "5- Check the absence of work submitted by students." << endl;
+                    cout << "6- Check capacity for talks." << endl;
 
-    deleteTeacherToGroup(123, 2, 60);
+                    cout << "\nEnter one option: ";
+                    cin >> option11;
+                    if (option11 == 1)
+                    {
+                        int option2;
+                        cout << "1- Insert teacher." << endl;
+                        cout << "2- Delete teacher." << endl;
+                        cout << "3- Modify teacher." << endl;
 
-    //inserStudent(7, "Sammi");
-    //bondStudentGroup(7, 51, 1);
-    //bondStudentGroup(7, 49, 1);
+                        cout << "\nEnter one option: ";
+                        cin >> option2;
+                        if (option2 == 1)
+                        {
+                            int idTeacher;
+                            string nameTeacher;
+                            cout << "Insert Teacher" << endl;
 
-    //semesterInsert(1, 2020, 6);
-    //semesterInsert(2, 2022, 6);
-    //semesterInsert(1, 2019, 2);
+                            cout << "Enter the ID: " << endl;
+                            cin >> idTeacher;
+                            cout << "Enter the name: " << endl;
+                            cin >> nameTeacher;
+                            teacherInsert(idTeacher, nameTeacher);
+                        }
+                        if (option2 == 2)
+                        {
+                            int idTeacher;
+                            cout << "Enter the ID: " << endl;
+                            cin >> idTeacher;
 
-    //bondSemesterCourse(2019, 1, 1);
-    //bondSemesterCourse(2019, 1, 2);
+                            teacherDelete(idTeacher);
+                        }
+                        if (option2 == 3)
+                        {
+                            int idTeacher;
+                            int idTeacherNew;
+                            string nameTeacherNwew;
+                            cout << "Enter the ID: " << endl;
+                            cin >> idTeacher;
+                            cout << "Enter the new ID: " << endl;
+                            cin >> idTeacherNew;
+                            cout << "Enter the new name: " << endl;
+                            cin >> nameTeacherNwew;
 
-    Teacher* temp = firstTeacher;
-    GroupAssignment* tempaux = temp->subListGroupT;
-    while (tempaux != NULL)
-    {
-        cout << tempaux->bondGroup->number<<endl;
-        tempaux = tempaux->sig;
-    }
+                            teacherMod(idTeacher, idTeacherNew, nameTeacherNwew);
+                        }
+                        if (option11 == 2)
+                        {
+                            int option22;
+                            cout << "1- Insert student." << endl;
+                            cout << "2- Delete student." << endl;
+                            cout << "3- Modify student." << endl;
+
+                            cout << "\nEnter one option: ";
+                            cin >> option22;
+                            if (option22 == 1)
+                            {
+                                int idStudent;
+                                string nameStudent;
+                                cout << "Insert Student" << endl;
+
+                                cout << "Enter the ID: " << endl;
+                                cin >> idStudent;
+                                cout << "Enter the name: " << endl;
+                                cin >> nameStudent;
+                                inserStudent(idStudent, nameStudent);
+                            }
+                            if (option22 == 2)
+                            {
+                                int idStudent;
+                                string nameStu;
+                                cout << "Enter the ID: " << endl;
+                                cin >> idStudent;
+                                cout << "Enter the name: " << endl;
+                                cin >> nameStu;
+
+                                remStudent(idStudent, nameStu);
+                            }
+                            if (option22 == 3)
+                            {
+                                int idStudent;
+                                int idStudentNew;
+                                string nameStudentNew;
+                                cout << "Enter the ID: " << endl;
+                                cin >> idStudent;
+                                cout << "Enter the new ID: " << endl;
+                                cin >> idStudentNew;
+                                cout << "Enter the new name: " << endl;
+                                cin >> nameStudentNew;
+
+                                modifyStudent(idStudent, idStudentNew, nameStudentNew);
+                            }
+                            if (option11 == 3)
+                            {
+                                int option3;
+                                cout << "1- Insert course." << endl;
+                                cout << "2- Delete course." << endl;
+                                cout << "3- Modify course." << endl;
+                                cout << "\nEnter one option: ";
+                                cin >> option3;
+                                if (option3 == 1)
+                                {
+                                    int idCourse;
+                                    string nameCourse;
+                                    int credits;
+                                    cout << "Insert Course" << endl;
+
+                                    cout << "Enter the ID: " << endl;
+                                    cin >> idCourse;
+                                    cout << "Enter the name: " << endl;
+                                    cin >> nameCourse;
+                                    cout << "Enter the credits: " << endl;
+                                    cin >> credits;
+                                    insertCourse(idCourse, nameCourse, credits);
+                                }
+                                if (option3 == 2)
+                                {
+                                    int idCourse;
+                                    cout << "Enter the ID: " << endl;
+                                    cin >> idCourse;
+                                    delCourse(idCourse);
+                                }
+                                if (option3 == 3)
+                                {
+
+                                    int idCourse;
+                                    int idCourseNew;
+                                    string nameCourseNew;
+                                    int creditsNew;
+                                    cout << "Enter the ID: " << endl;
+                                    cin >> idCourse;
+                                    cout << "Enter the new ID: " << endl;
+                                    cin >> idCourseNew;
+                                    cout << "Enter the new name: " << endl;
+                                    cin >> nameCourseNew;
+                                    cout << "Enter the new credits: " << endl;
+                                    cin >> creditsNew;
+
+                                    modCourse(idCourse, idCourseNew, nameCourseNew, creditsNew);
+                                }
+                                if (option11 == 4)
+                                {
+                                    cout << "Falta varas";
+                                }
+                                if (option11 == 5)
+                                {
+                                    cout << "Falta varas";
+                                }
+                                if (option11 == 6)
+                                {
+                                    cout << "Falta varas";
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (option == 2)
+        {
+            int option1;
+            int idTeacher;
+            cout << "\n Enter the ID Teacher: "; cin >> idTeacher;
+
+            if (searchTeacher(idTeacher) != NULL)
+            {
+                cout << "1. Activity Options. " << endl;
+                cout << "2. General Talks Options. " << endl;
+                cout << "3. Homework Delivery Options. " << endl;
+                cout << "4. Consult Attendance of Scheduled Talks. " << endl;
+                cout << "5. Consultation of Pending Student Work. " << endl;
+                cout << "6. Consultation Best Professor with Delivery Compliance. " << endl;
+
+                cout << " \n Enter Option: "; cin >> option1;
+
+                if (option1 == 1) {}
+                if (option1 == 2) {}
+                if (option1 == 3) {}
+                if (option1 == 4) {}
+                if (option1 == 5) {}
+                if (option1 == 6) {}
+            }
+
+        }
+
+        if (option == 3)
+        {
+            int option1;
+            int idStudent;
+            cout << " \n Enter the ID Student: "; cin >> idStudent;
+
+            if (searchStudent(idStudent) != NULL)
+            {
+                cout << "1. Activity Register. " << endl;
+                cout << "2. Talks Attendance Record. " << endl;
+                cout << "3. Check the activities scheduled in the week. " << endl;
+                cout << "4. Consultation of students with more than 4 courses and 100% of works delivered. " << endl;
+
+                cout << " \n Enter Option: "; cin >> option1;
+
+                if (option1 == 1) {}
+                if (option1 == 2) {}
+                if (option1 == 3) {}
+                if (option1 == 4) {}
+            }
+        }
+
+        if (option == 4)
+        {
+                break;
+        }
 
 
-
-   /*  Student* temp1 = firstStudent;
-    cout << temp1->sublistGroup->bondGroup->number << endl << temp1->sublistGroup->sig->bondGroup->number<<endl;Semester* temp2 = firstSemester;
-
-    cout << temp2->subListCourse->bondCourse->name << endl;
-    cout << temp2->subListCourse->sig->bondCourse->name << endl;
-
-    Course* temp = firstCourse;
-    Group * tempaux = firstCourse->sig->enlaceGrupoC;
-    while(tempaux!=NULL)
-    {
-        cout<<tempaux->number<<endl<<"Del curso: "<<tempaux->enlaceCourse->id<<endl;
-        tempaux = tempaux->sig;
-    }
-    */
-
-
+    }while (repeat);
+    return 0;
 }
 
 
