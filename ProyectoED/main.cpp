@@ -59,12 +59,16 @@ struct Student {
     string name;
     Student* sig;
     struct GroupAssignment* sublistGroup; //Relation of student-group.
+    struct DeliveredActivities* linkToScore;
+    struct GeneralTalkAssistance* linkToGeneralTA;
+
 
     Student(int idd, string n) {
         id = idd;
         name = n;
         sig = NULL;
         sublistGroup = NULL;
+        linkToScore = NULL;
     }
 };
 
@@ -75,7 +79,7 @@ struct Semester {
     Semester* sig;
     Semester* ant;
     struct CourseAssignment* subListCourse; // Relation of semester-course.
-    struct generalTalks* bondTalk; // Relation of semester-general talks.
+    struct GeneralTalks* bondTalk; // Relation of semester-general talks.
 
     Semester(int s, int y, int w) {
         semester = s;
@@ -89,11 +93,11 @@ struct Semester {
 };
 
 
-struct Evaluation {
+struct Evaluation { //used to create the list of exam,project,excursion, task
     int idE;
     string name;
     int percentage;
-    int day, month, year; // Fecha de entrega.
+    int day, month, year;
     Evaluation* sig;
 
     Evaluation(int idd, string n, int p, int d, int m, int y) {
@@ -107,15 +111,31 @@ struct Evaluation {
     }
 };
 
+struct GeneralTalkAssistance {
 
-struct generalTalks {
+    GeneralTalkAssistance* sig;
+    struct GeneralTalks* linkToGeneralT;
+
+    GeneralTalkAssistance() {
+        sig = NULL;
+        linkToGeneralT=NULL;
+    }
+
+};
+struct GeneralTalks {
     int number;
     string name;
-    generalTalks* sig;
+    int day;
+    int month;
+    int year;
+    GeneralTalks* sig;
 
-    generalTalks(int num, string n) {
+    GeneralTalks(int num, string n,int d,int m,int y) {
         number = num;
         name = n;
+        day = d;
+        month = m;
+        year = y;
         sig = NULL;
     }
 };
@@ -146,18 +166,6 @@ struct Group {
 
 
 //SubLists.
-struct assignmentsDelivered {
-
-    assignmentsDelivered* sig;
-    struct Evaluation* bondAssignments;
-
-    assignmentsDelivered()
-    {
-        sig = NULL;
-        bondAssignments = NULL;
-    }
-};
-
 
 struct CourseAssignment {
 
@@ -170,6 +178,21 @@ struct CourseAssignment {
         bondCourse = NULL;
     }
 };
+
+struct DeliveredActivities //used to assign scores to activities
+{
+    int score;
+    DeliveredActivities* sig;
+    struct Evaluation* linkActivity;
+    DeliveredActivities(int s)
+    {
+        score = s;
+        sig = NULL;
+        linkActivity = NULL;
+    }
+
+};
+
 
 struct GroupAssignment {
 
@@ -299,11 +322,11 @@ Student* searchStudent(int id) {  //
     return NULL;
 }
 
-Student* inserStudent(int id, string name) {   //To insert student
+Student* insertStudent(int id, string name) {   //To insert student
     Student* nn = new Student(id, name);
 
     if (searchStudent(id) != NULL) {     //To verify that not repeated data
-        cout << "The student is already registered: " << id <<endl;
+        cout << "The student is already registered: " << id << endl;
     }
 
     else {
@@ -390,60 +413,65 @@ Semester* searchSemester(int year, int numSemester)  //search for the list of th
 
 void semesterInsert(int semester, int year, int week) //insert the data to the list of firstSemester.
 {
-    Semester* nn = new Semester(semester, year, week);
-
-    if (firstSemester == NULL)  //if the list is empty add the element in the list
-        firstSemester = nn;
-
-    else if (nn->year <= firstSemester->year)    //To verify if the next element will be above the first element in the list
-    {
-        if (nn->year != firstSemester->year) //if the first
-        {
-            nn->sig = firstSemester;
-            firstSemester->ant = nn;
-            firstSemester = nn;
-        }
-        else if (nn->year == firstSemester->year && nn->semester < firstSemester->semester)   //if the first element is equal to nn and the semester of nn is below the semester of the first element in the list
-        {
-            nn->sig = firstSemester;
-            firstSemester->ant = nn;
-            firstSemester = nn;
-        }
-        //if it
-        else
-        {
-            firstSemester->sig = nn;
-            nn->ant = firstSemester;
-        }
-
-    }
+    Semester* temp = searchSemester(year, semester);
+    if (temp != NULL) { cout << "The semester is repeated"; }   //to make sure the semester inserted is not repeated
     else
     {
-        Semester* temp = firstSemester;
-        Semester* tempAnt = NULL;
+        Semester* nn = new Semester(semester, year, week);
 
-        while ((temp != NULL) && (nn->year > temp->year))   //if the nn element is mayor than the first element in the list
-        {
-            tempAnt = temp;
-            temp = temp->sig;
-        }
+        if (firstSemester == NULL)  //if the list is empty add the element in the list
+            firstSemester = nn;
 
-        if ((temp == NULL) || (temp->semester > nn->semester && temp->year == nn->semester)) //if the element is the greatest
+        else if (nn->year <= firstSemester->year)    //To verify if the next element will be above the first element in the list
         {
-            tempAnt->sig = nn;
-            nn->ant = tempAnt;
+            if (nn->year != firstSemester->year) //if the first
+            {
+                nn->sig = firstSemester;
+                firstSemester->ant = nn;
+                firstSemester = nn;
+            }
+            else if (nn->year == firstSemester->year && nn->semester < firstSemester->semester)   //if the first element is equal to nn and the semester of nn is below the semester of the first element in the list
+            {
+                nn->sig = firstSemester;
+                firstSemester->ant = nn;
+                firstSemester = nn;
+            }
+            //if it
+            else
+            {
+                firstSemester->sig = nn;
+                nn->ant = firstSemester;
+            }
+
         }
-        else            //to insert between the list
+        else
         {
-            nn->sig = temp;
-            nn->ant = tempAnt;
-            tempAnt->sig = nn;
-            temp->ant = nn;
+            Semester* temp = firstSemester;
+            Semester* tempAnt = NULL;
+
+            while ((temp != NULL) && (nn->year > temp->year))   //if the nn element is mayor than the first element in the list
+            {
+                tempAnt = temp;
+                temp = temp->sig;
+            }
+
+            if ((temp == NULL) || (temp->semester > nn->semester && temp->year == nn->semester)) //if the element is the greatest
+            {
+                tempAnt->sig = nn;
+                nn->ant = tempAnt;
+            }
+            else            //to insert between the list
+            {
+                nn->sig = temp;
+                nn->ant = tempAnt;
+                tempAnt->sig = nn;
+                temp->ant = nn;
+            }
         }
+        return;
     }
-    return;
-}
 
+}
 
 void semesterMod(int year, int semester, int modSemester, int modYear, int modWeek)  //it modifies a variable of the semester list
 {
@@ -540,14 +568,14 @@ void insertCourse(int id, string name, int credits)   //insertion to the final p
     }
 }
 
-void modCourse(int id, int idm, string namem,int credistm)   //It is used to modify the list of courses
+void modCourse(int id, int idm, string namem, int credistm)   //It is used to modify the list of courses
 {
     Course* temp = searchCourse(id);
     if (temp != NULL)
     {
         temp->id = idm;
         temp->name = namem;
-        temp->credits=credistm;
+        temp->credits = credistm;
         cout << "modCourse completed" << endl;
     }
     else { cout << "element of modCourse not found to modify" << endl; }
@@ -584,7 +612,7 @@ void delCourse(int id)  //it is used to delete elements of the list of courses
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-Group * searchGroup(int idCourse,int idGroup )  //used to search group in a course
+Group* searchGroup(int idCourse, int idGroup)  //used to search group in a course
 {
     Course* tempCourse = searchCourse(idCourse);
     if (tempCourse != NULL)
@@ -597,9 +625,10 @@ Group * searchGroup(int idCourse,int idGroup )  //used to search group in a cour
         }
         return NULL;
     }
-    cout << "The course does not exist"<<endl;
-
+    cout << "The course does not exist" << endl;
+    return NULL;
 }
+
 void insertGroupToCourse(int idC, int numG) //It is used for insert groups as a sublist in courses
 {
     Course* tempCourse = searchCourse(idC);
@@ -675,12 +704,12 @@ void linkTeacherToGroup(int idProf, int idCourse, int idGroup)    //it is used t
 
     }
 }
-void deleteTeacherToGroup(int idTeacher,int idCourse,int idGroup)
+void deleteTeacherToGroup(int idTeacher, int idCourse, int idGroup)
 {
     Teacher* tempTeacher = searchTeacher(idTeacher);
     Group* tempGroup = searchGroup(idCourse, idGroup);
 
-    if (tempTeacher == NULL || tempGroup == NULL || tempTeacher->subListGroupT == NULL) { cout << "There is an element that does not exist in function deleteTeacherToGroup"<<endl; }
+    if (tempTeacher == NULL || tempGroup == NULL || tempTeacher->subListGroupT == NULL) { cout << "There is an element that does not exist in function deleteTeacherToGroup" << endl; }
     else
     {
         GroupAssignment* temp = tempTeacher->subListGroupT;
@@ -709,7 +738,7 @@ void bondStudentGroup(int idS, int idG, int idC) {
     Group* gg = searchGroup(idC, idG);
     Course* cc = searchCourse(idC);
 
-    if (ss == NULL || gg == NULL || cc == NULL) {//For elements not exist
+    if (ss == NULL || gg == NULL || cc == NULL) {//if the elements does not exist
         cout << "Elements does not exit";
     }
     else {//To elements exist
@@ -722,28 +751,28 @@ void bondStudentGroup(int idS, int idG, int idC) {
     }
 }
 
-void deleteStudentGroup(int idStu, int idGro, int idCour){//To delete the bond of student with group
+void deleteStudentGroup(int idStu, int idGro, int idCour) {//To delete the bond of student with group
     Student* student = searchStudent(idStu);
     Group* group = searchGroup(idCour, idGro);
-    if (student==NULL||group==NULL||student->sublistGroup==NULL){//To verify if both student or group exist
-        cout<<"Some elements of student or group do not exist"<<endl;
+    if (student == NULL || group == NULL || student->sublistGroup == NULL) {//To verify if both student or group exist
+        cout << "Some elements of student or group do not exist" << endl;
     }
-    else{
-        GroupAssignment*studentemp=student->sublistGroup;
-        GroupAssignment*tempS=student->sublistGroup;
+    else {
+        GroupAssignment* studentemp = student->sublistGroup;
+        GroupAssignment* tempS = student->sublistGroup;
 
-        if(studentemp->bondGroup->number==idGro){//To first elements of the list
-            studentemp=studentemp->sig;
-            student->sublistGroup=studentemp;
-            cout<<"The student has been removed from the group"<<endl;
+        if (studentemp->bondGroup->number == idGro) {//To first elements of the list
+            studentemp = studentemp->sig;
+            student->sublistGroup = studentemp;
+            cout << "The student has been removed from the group" << endl;
         }
-        else{//For the others elements of the list, that not first
-            while(studentemp->bondGroup!=group){
-                tempS=studentemp;
-                studentemp=studentemp->sig;
+        else {//For the others elements of the list, that not first
+            while (studentemp->bondGroup != group) {
+                tempS = studentemp;
+                studentemp = studentemp->sig;
             }
-            tempS->sig=studentemp->sig;
-            cout<<"The student has been removed from the group"<<endl;
+            tempS->sig = studentemp->sig;
+            cout << "The student has been removed from the group" << endl;
         }
     }
 }
@@ -771,17 +800,17 @@ Group* verifyTeacherLinkToGroup(int idTeacher, int idGroup) // to verify if teac
 {
     Teacher* tempTeacher = searchTeacher(idTeacher);
     GroupAssignment* temp = tempTeacher->subListGroupT; //instance of the sublist that links the Teacher to Group
-        while(temp!=NULL)
-        {
-            if (temp->bondGroup->number == idGroup){
-                Group* tempG = temp->bondGroup;
-                return tempG;
+    while (temp != NULL)
+    {
+        if (temp->bondGroup->number == idGroup) {
+            Group* tempG = temp->bondGroup;
+            return tempG;
 
-            }
-
-            temp = temp->sig;
         }
-        return NULL;
+
+        temp = temp->sig;
+    }
+    return NULL;
 }
 
 Evaluation* sortDateActivities(Evaluation* first, Evaluation* nnE)
@@ -798,7 +827,7 @@ Evaluation* sortDateActivities(Evaluation* first, Evaluation* nnE)
 
     else
     {
-        if (nnE->year < first->year) //if its the lowest element
+        if ((nnE->year < first->year) || (nnE->year == first->year && nnE->month < first->month) || (nnE->year == first->year && nnE->month) == (first->month && nnE->day < first->day)) //if its the lowest element
         {
             nnE->sig = first;
             first = nnE;
@@ -809,7 +838,7 @@ Evaluation* sortDateActivities(Evaluation* first, Evaluation* nnE)
         {
             while ((temp != NULL) && (nnE->year > temp->year))//the whiles in this fuction locates the variable temp where it should be
             {
-                tempPrev= temp;
+                tempPrev = temp;
                 temp = temp->sig;
             }
             if (temp == NULL)//in its the mayor number in the list
@@ -835,7 +864,7 @@ Evaluation* sortDateActivities(Evaluation* first, Evaluation* nnE)
                 }
                 else if (nnE->month == temp->month) //to sort based in day with equal month and year
                 {
-                    while (temp != NULL && nnE->day > temp->day && nnE->month == temp->month && nnE->year == temp->year )
+                    while (temp != NULL && nnE->day >= temp->day && nnE->month == temp->month && nnE->year == temp->year)
                     {
                         tempPrev = temp;
                         temp = temp->sig;
@@ -855,37 +884,37 @@ Evaluation* sortDateActivities(Evaluation* first, Evaluation* nnE)
             nnE->sig = temp;
             tempPrev->sig = nnE;
 
-                return first;
+            return first;
         }
     }
 }
 
-Evaluation* typeActivity(Group* teacherGroup,int option)   //used to assign the variable temp in the function searchActivities
+Evaluation* typeActivity(Group* tempGroup, int option)   //used to assign the variable temp in the function searchActivities
 {
 
-    if (option == 1){
-        Evaluation* temp = teacherGroup->sublistaTarea;
+    if (option == 1) {
+        Evaluation* temp = tempGroup->sublistaTarea;
         return temp;
     }
-    else if(option ==2){
-        Evaluation* temp = teacherGroup->sublistaProyectos;
+    else if (option == 2) {
+        Evaluation* temp = tempGroup->sublistaProyectos;
         return temp;
     }
-    else if(option==3){
-        Evaluation* temp = teacherGroup->sublistaExamen;
+    else if (option == 3) {
+        Evaluation* temp = tempGroup->sublistaExamen;
         return temp;
     }
-    else if(option==4){
-        Evaluation* temp = teacherGroup->sublistaGiras;
+    else if (option == 4) {
+        Evaluation* temp = tempGroup->sublistaGiras;
         return temp;
     }
     else {
-        cout << "The option does not exist"<<endl;
+        cout << "The option does not exist" << endl;
         return NULL;
     }
 }
 
-Evaluation* searchTeacherActivities(int teacherId,int idGroup,int idEvaluation,int option) // used to see if there are activities with repeated ids
+Evaluation* searchTeacherActivities(int teacherId, int idGroup, int idEvaluation, int option) // used to see if there are activities with repeated ids
 {
 
     Group* tempG = verifyTeacherLinkToGroup(teacherId, idGroup);
@@ -904,25 +933,25 @@ Evaluation* searchTeacherActivities(int teacherId,int idGroup,int idEvaluation,i
 
 }
 
-void insertTeacherActivities(int idTeacher,int idGroup,int idCourse,int optionAssignment,int idEvaluation,string subject,int percentage,int day,int month,int year)
+void insertTeacherActivities(int idTeacher, int idGroup, int idCourse, int optionAssignment, int idEvaluation, string subject, int percentage, int day, int month, int year)
 {
     //it is used to insert the activities in the different assignments
 
-    Group* temp = verifyTeacherLinkToGroup(idTeacher,idGroup);   //to see if the group exist
-    if (temp == NULL) { cout << "First you need to assign a group to the Teacher or the activity id is repeated "<<endl; }
+    Group* temp = verifyTeacherLinkToGroup(idTeacher, idGroup);   //to see if the group exist
+    if (temp == NULL) { cout << "First you need to assign a group to the Teacher or the activity id is repeated " << endl; }
     else
     {
         //int option;
         //cout << endl << "Select the option you want \n1-Task\n2-Project\n3-Exam\n4-Excursion\nPresione cualquier otra tecla para salir...";
         //cin >> option;
-        Evaluation* check = searchTeacherActivities(idTeacher,idGroup, idEvaluation,optionAssignment);//used to see if there is repeated elements
+        Evaluation* check = searchTeacherActivities(idTeacher, idGroup, idEvaluation, optionAssignment);//used to see if there is repeated elements
 
-        if (optionAssignment == 1 && check==NULL)
+        if (optionAssignment == 1 && check == NULL)
         {
 
-            Evaluation* nnTask = new Evaluation(idEvaluation,subject,percentage,day,month,year);
+            Evaluation* nnTask = new Evaluation(idEvaluation, subject, percentage, day, month, year);
             temp->sublistaTarea = sortDateActivities(temp->sublistaTarea, nnTask); //it used to insert the element with date order
-            cout << "the element were assigned to Task Activity"<<endl;
+            cout << "the element were assigned to Task Activity" << endl;
         }
         else if (optionAssignment == 2 && check == NULL)
         {
@@ -944,41 +973,41 @@ void insertTeacherActivities(int idTeacher,int idGroup,int idCourse,int optionAs
         }
         else
         {
-            cout << "There is a repated element"<<endl;
-             return;
+            cout << "There is a repated element" << endl;
+            return;
         }
     }
 }
 
 //used to modify the list of exam,task,project and excursions of teacher activities
-void modifyAssignmentsTeacherProfile(int idTeacher,int idGroup,int idEvaluation,string subject,int percentage,int option)
+void modifyAssignmentsTeacherProfile(int idTeacher, int idGroup, int idEvaluation, string subject, int percentage, int option)
 {
 
     //cout << "Select the option you want \n1-Task\n2-Project\n3-Exam\n4-Excursion\nPress any key to exit..."<<endl;
     //int option;
     //cin >> option;
 
-    Evaluation* tempSearched = searchTeacherActivities(idTeacher,idGroup ,idEvaluation, option); // it is used if there is repeated id activities
+    Evaluation* tempSearched = searchTeacherActivities(idTeacher, idGroup, idEvaluation, option); // it is used if there is repeated id activities
     if (tempSearched != NULL)
     {
         tempSearched->name = subject;
         tempSearched->percentage = percentage;
-        cout << "The teacher sublist was modified"<<endl;
+        cout << "The teacher sublist was modified" << endl;
     }
 
 }
 
-void deleteAssignmentProfileTeacher(int idTeacher,int idGroup ,int idEvaluation,int option)//used to delete activities assigned to a teacher
+void deleteAssignmentProfileTeacher(int idTeacher, int idGroup, int idEvaluation, int option)//used to delete activities assigned to a teacher
 {
-    Evaluation* temp = searchTeacherActivities(idTeacher, idGroup, idEvaluation,option);//used to locate the element to delete it
-    Group* tempG = verifyTeacherLinkToGroup(idTeacher,idGroup);//locates the group where is the sublist
+    Evaluation* temp = searchTeacherActivities(idTeacher, idGroup, idEvaluation, option);//used to locate the element to delete it
+    Group* tempG = verifyTeacherLinkToGroup(idTeacher, idGroup);//locates the group where is the sublist
     Evaluation* tempFirst = typeActivity(tempG, option);//locates the type of activity to get the first position of the list;
-    Evaluation* tempPrev= tempFirst; //used to make the delete
+    Evaluation* tempPrev = tempFirst; //used to make the delete
     if (temp != NULL)
     {
         if (temp == tempFirst) {//if its the first element in the list
             tempFirst = tempFirst->sig;
-            cout << "first element in the list will be deleted... function deleteAssignmentProfileTeacher"<<endl;
+            cout << "first element in the list will be deleted... function deleteAssignmentProfileTeacher" << endl;
             if (option == 1) { tempG->sublistaTarea = tempFirst; }  //it needs to change the link
             else if (option == 2) { tempG->sublistaProyectos = tempFirst; }
             else if (option == 3) { tempG->sublistaExamen = tempFirst; }
@@ -994,13 +1023,193 @@ void deleteAssignmentProfileTeacher(int idTeacher,int idGroup ,int idEvaluation,
             }
             temp = temp->sig;
             tempPrev->sig = temp;
-            cout << "The element was deleted... function deleteAssignmentProfileTeacher"<<endl;
+            cout << "The element was deleted... function deleteAssignmentProfileTeacher" << endl;
 
         }
     }
 }
 
+GeneralTalks * sortDateGeneralTalks(GeneralTalks* first, GeneralTalks* nnE)
+{
+    GeneralTalks* temp = first;
+    GeneralTalks* tempPrev = first;
+    if (first == NULL) //if the list is empty
+    {
+        nnE->sig = first;
+        first = nnE;
 
+        return first;
+    }
+
+    else
+    {
+        if ((nnE->year < first->year) || (nnE->year == first->year && nnE->month < first->month) || (nnE->year == first->year && nnE->month == first->month && nnE->day<first->day)) //if its the lowest element
+        {
+            nnE->sig = first;
+            first = nnE;
+
+            return first;
+        }
+        else
+        {
+            while ((temp != NULL) && (nnE->year > temp->year))//the whiles in this fuction locates the variable temp where it should be
+            {
+                tempPrev = temp;
+                temp = temp->sig;
+            }
+            if (temp == NULL)//in its the mayor number in the list
+            {
+                nnE->sig = temp;
+                tempPrev->sig = nnE;
+
+                return first;
+            }
+            else if (nnE->year == temp->year)    //it verifies which is the lowest element
+            {
+                while (temp != NULL && nnE->month > temp->month && nnE->year == temp->year) //to sort based in equal year but different month
+                {
+                    tempPrev = temp;
+                    temp = temp->sig;
+                }
+                if (temp == NULL)
+                {
+                    nnE->sig = temp;
+                    tempPrev->sig = nnE;
+
+                    return first;
+                }
+                else if (nnE->month == temp->month) //to sort based in day with equal month and year
+                {
+                    while (temp != NULL && nnE->day >= temp->day && nnE->month == temp->month && nnE->year == temp->year)
+                    {
+                        tempPrev = temp;
+                        temp = temp->sig;
+                    }
+                    nnE->sig = temp;
+                    tempPrev->sig = nnE;
+
+                    return first;
+                }
+                //if is not equal nne month != temp month. it goes between
+                nnE->sig = temp;
+                tempPrev->sig = nnE;
+
+                return first;
+            }
+            //if nnE year!= temp year   if its between
+            nnE->sig = temp;
+            tempPrev->sig = nnE;
+
+            return first;
+        }
+    }
+}
+GeneralTalks *searchGeneralTalks(int semesterNum, int semesterYear, int idgeneralTalk)
+{
+    Semester* tempS = searchSemester(semesterYear, semesterNum);
+    GeneralTalks* temp = tempS->bondTalk;
+    while (temp != NULL)
+    {
+        if (temp->number == idgeneralTalk) { return temp; }
+        temp = temp->sig;
+    }
+    return NULL;
+}
+void insertGeneralTalksToSemester(int semester, int semesterYear,int idGeneralTalk,string subject,int gtDay,int gtMonth,int gtYear)
+{
+    Semester* temp = searchSemester(semesterYear, semester);
+    GeneralTalks* tempGT = searchGeneralTalks(semester, semesterYear, idGeneralTalk);//used ti see if there is no general talk id repeated
+    if (temp != NULL && tempGT == NULL){
+        GeneralTalks* nnGT = new GeneralTalks(idGeneralTalk,subject, gtDay,gtMonth,gtYear);
+        temp->bondTalk = sortDateGeneralTalks(temp->bondTalk,nnGT);
+        cout << "General Talk inserted"<<endl;
+    }
+    else
+    {
+        cout << "Semester does not exist"<<endl;
+    }
+}
+
+Group* verifyStudentLinkToGroup(int idStudent,int idCourse, int idGroup)//used to verify if there is a link of student to group
+{
+    Student* tempS = searchStudent(idStudent);
+    GroupAssignment* temp = tempS->sublistGroup;
+    while (temp != NULL)
+    {
+        if (temp->bondGroup->enlaceCourse->id == idCourse && temp->bondGroup->number == idGroup)
+        {
+            Group* tempG = temp->bondGroup;
+            return tempG;
+        }
+        temp = temp->sig;
+    }
+    return NULL;
+}
+
+Evaluation* searchStudentActivity(int idStudent, int idCourse , int idGroup,int idEvaluation, int option)//used to find if student is linked with an activity
+{
+    Group* tempS = verifyStudentLinkToGroup(idStudent,idCourse, idGroup);
+    Evaluation* temp = typeActivity(tempS, option);
+
+    if (temp != NULL)
+    {
+        while (temp != NULL)
+        {
+            if (temp->idE == idEvaluation) { return temp; }  //used to see if there is an element in the list repeated
+            temp = temp->sig;
+        }
+        return NULL;
+    }
+    return NULL;
+}
+
+DeliveredActivities* searchDeliveredActivities(int idStudent,int idCourse,int idGroup,int idEvaluation,int option) //used to see if there is no repeated delivered activities
+{
+    Student* tempStudent = searchStudent(idStudent);
+    DeliveredActivities* temp = tempStudent->linkToScore;
+    Evaluation* tempActivity =searchStudentActivity(idStudent,idCourse,idGroup,idEvaluation,option);
+    while (temp != NULL)
+    {
+        if (tempActivity == temp->linkActivity) { return temp; } //it is repeated
+        temp= temp->sig;
+    }
+    return NULL;
+}
+
+void registerActivitiesToStudents(int idStudent,int idCourse,int idGroup,int optionActivity,int idEvaluation,int score)//used to register the activities made of the students
+{
+    DeliveredActivities* tempDA = searchDeliveredActivities(idStudent, idCourse, idGroup, idEvaluation, optionActivity);
+    Evaluation* temp = searchStudentActivity(idStudent, idCourse, idGroup, idEvaluation, optionActivity);
+
+    if (tempDA != NULL && temp==NULL) { cout << "The delivered activity is repated.... in fuction registerActivitiesToStudents"<<endl; }
+    else
+    {
+        Student* tempTeacher=searchStudent(idStudent);
+        DeliveredActivities* nnDA = new DeliveredActivities(score);
+        nnDA->sig = tempTeacher->linkToScore;
+        tempTeacher->linkToScore = nnDA;
+        nnDA->linkActivity = temp;
+        cout << "The delivered Activity registered" << endl;
+    }
+
+}
+
+void registerAssistanceToGeneralTalks(int idStudent,int idGeneralTalk,int semesterNum,int semesterYear)
+{
+    Student* tempS = searchStudent(idStudent);
+    GeneralTalks* tempGT = searchGeneralTalks(semesterNum,semesterYear,idGeneralTalk);
+    GeneralTalkAssistance* nn = new GeneralTalkAssistance();
+    if (tempS != NULL && tempGT!=NULL)
+    {
+
+        nn->sig = tempS->linkToGeneralTA;
+        tempS->linkToGeneralTA = nn;
+        nn->linkToGeneralT = tempGT;
+
+    }
+}
+
+//la sublista de grpup assignment se podría utilizar para que se linkee con la asistencia a charlas
 void menu()
 {
     int option;
@@ -1116,7 +1325,7 @@ void menu()
                                 cin >> idStudent;
                                 cout << "Enter the name: " << endl;
                                 cin >> nameStudent;
-                                inserStudent(idStudent, nameStudent);
+                                insertStudent(idStudent, nameStudent);
                             }
                             if (option22 == 2)
                             {
@@ -1260,11 +1469,11 @@ void menu()
 
         if (option == 4)
         {
-                break;
+            break;
         }
 
 
-    }while (repeat);
+    } while (repeat);
 
 }
 int main()
@@ -1294,7 +1503,7 @@ int main()
 
     deleteTeacherToGroup(123, 2, 60);
 
-    inserStudent(7, "Sammi");
+    insertStudent(7, "Sammi");
     bondStudentGroup(7, 51, 1);
     bondStudentGroup(7, 49, 1);
 
@@ -1305,34 +1514,66 @@ int main()
     bondSemesterCourse(2019, 1, 1);
     bondSemesterCourse(2019, 1, 2);
     insertTeacherActivities(123, 51, 1, 1, 20, "Tarea 1", 20, 20, 7, 2021);
-    insertTeacherActivities(123, 51, 1, 1, 21, "Tarea 2", 20, 1, 7, 2001);
+    insertTeacherActivities(123, 51, 1, 1, 21, "Tarea 2", 20, 2, 7, 2001);
     insertTeacherActivities(123, 51, 1, 1, 22, "Tarea 3", 9, 20, 7, 2021);
     insertTeacherActivities(123, 51, 1, 1, 23, "Tarea 4", 20, 5, 12, 2021);
     insertTeacherActivities(123, 51, 1, 1, 24, "Tarea 5", 20, 23, 7, 2021);
     insertTeacherActivities(123, 51, 1, 1, 25, "Tarea 5", 20, 20, 7, 2025);
-    modifyAssignmentsTeacherProfile(123, 51, 21, "Modificado", 13, 1);  //se modifica del id 21 y se borra con el 24
-    deleteAssignmentProfileTeacher(123, 51, 21, 1);
-    deleteAssignmentProfileTeacher(123, 51, 24, 1);
+    insertTeacherActivities(123, 51, 1, 1, 25, "Tarea 5", 20, 1, 7, 2001);
+    //modifyAssignmentsTeacherProfile(123, 51, 21, "Modificado", 13, 1);  //se modifica del id 21 y se borra con el 24
+    //deleteAssignmentProfileTeacher(123, 51, 21, 1);
+    //deleteAssignmentProfileTeacher(123, 51, 24, 1);
 
-    Group*tempG= searchGroup(1,51);
+    Group* tempG = searchGroup(1, 51);
+    Evaluation* temp = tempG->sublistaTarea;
+    while (temp != NULL)
+    {
+        cout << temp->year << "\t" << temp->month << "\t" << temp->day<<endl;
+        temp = temp->sig;
+    }
+
+    insertGeneralTalksToSemester(1, 2020,1,"first general talk",20,2,2020);
+    insertGeneralTalksToSemester(1, 2020,2, "second general talk", 15, 2, 2020);
+    insertGeneralTalksToSemester(1, 2020,3, "third general talk", 1, 2, 2021);
+
+    registerActivitiesToStudents(7, 1, 51, 1, 20, 70);
+    registerActivitiesToStudents(7, 1, 51, 1, 21, 71);
+    registerActivitiesToStudents(7, 1, 51, 1, 25, 79);
+
+    DeliveredActivities* tempDA = firstStudent->linkToScore;
+    while (tempDA != NULL)
+    {
+        cout << tempDA->score<<endl<<tempDA->linkActivity->name<<endl;
+        tempDA = tempDA->sig;
+    }
+
+    /*    Semester* tempS = searchSemester(2020, 1);
+    GeneralTalks* temp = tempS->bondTalk;
+    while (temp != NULL)
+    {
+        cout << temp->name<<endl;
+        temp = temp->sig;
+    }
+    //***********
+    Group* tempG = searchGroup(1, 51);
     Evaluation* temp = tempG->sublistaTarea;
 
     while (temp != NULL)
     {
-        cout <<temp->idE<<"\t"<<temp->name<<endl << temp->year << "\t" << temp->month << "\t" << temp->day << endl;
+        cout << temp->idE << "\t" << temp->name << endl << temp->year << "\t" << temp->month << "\t" << temp->day << endl;
         temp = temp->sig;
     }
 
-
-    /*  Teacher* temp = firstTeacher;
+    //****************
+    Teacher* temp = firstTeacher;
     GroupAssignment* tempaux = temp->subListGroupT;
     while (tempaux != NULL)
     {
         cout << tempaux->bondGroup->number << endl;
         tempaux = tempaux->sig;
     }
-
-  Student* temp1 = firstStudent;
+    /******************
+     Student* temp1 = firstStudent;
      cout << temp1->sublistGroup->bondGroup->number << endl << temp1->sublistGroup->sig->bondGroup->number<<endl;Semester* temp2 = firstSemester;
 
      cout << temp2->subListCourse->bondCourse->name << endl;
@@ -1345,11 +1586,10 @@ int main()
          cout<<tempaux->number<<endl<<"Del curso: "<<tempaux->enlaceCourse->id<<endl;
          tempaux = tempaux->sig;
      }
+     //**************
      */
 
 
 
     return 0;
 }
-
-
